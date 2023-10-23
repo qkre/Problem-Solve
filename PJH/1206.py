@@ -1,19 +1,18 @@
 import sys
 
-sys.stdin = open("input.txt", "r")
+sys.stdin = open("SWEA/input/1206_input.txt", "r")
 
-T = int(input())
+T = 10
 # 여러개의 테스트 케이스가 주어지므로, 각각을 처리합니다.
 for test_case in range(1, T + 1):
     N = int(input())
 
     buildings = list(map(int, input().split()))
+    view = 0
 
     for i in range(N):
         left = False
         right = False
-
-        view = 0
 
         if i == 0:
             left = True
@@ -36,4 +35,12 @@ for test_case in range(1, T + 1):
 
         if left and right:
             if i == 0:
-                view += buildings[i] - max(buildings[: i + 3])
+                view += buildings[i] - max(buildings[i + 1 : i + 3])
+            elif i == N - 1:
+                view += buildings[i] - max(buildings[i - 2 : i + 1])
+            else:
+                view += buildings[i] - max(
+                    max(buildings[i - 2 : i]), max(buildings[i + 1 : i + 3])
+                )
+
+    print(f"#{test_case} {view}")
