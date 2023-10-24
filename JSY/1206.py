@@ -8,6 +8,3 @@ for i in range(10):
     ret = 0
     
     for j in range(2, len(arr)-2):
-        
-    
-    
