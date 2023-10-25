@@ -34,7 +34,7 @@ for i in range(t):
             cnt += 1
 
         if len(money) == 0 and cnt < int(change):
-            count = Count   er(temp).most_common(1)
+            count = Counter(temp).most_common(1)
             if count[0][1] > 1:  # 같은 요소가 2개면 break
                 break
             # else: 아니면 맨 뒤에 2개 씩 바꾸면서 cnt += 1 cnt랑 change 같으면 break
