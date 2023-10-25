@@ -1,6 +1,6 @@
 import sys
 
-sys.stdin = open("SWEA/input/1206_input.txt", "r")
+sys.stdin = open("input/1206_input.txt", "r")
 
 T = 10
 # 여러개의 테스트 케이스가 주어지므로, 각각을 처리합니다.
