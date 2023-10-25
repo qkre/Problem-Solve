@@ -1,7 +1,7 @@
 import sys
 from collections import deque, Counter
 
-sys.stdin = open("input/1244_input.txt")
+# sys.stdin = open("input/1244_input.txt")
 
 t = int(input())
 
