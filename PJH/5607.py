@@ -10,6 +10,7 @@ result = []
 
 T = int(input())
 
+
 def fp(N, p):
     global C
     if p == 0:
@@ -28,7 +29,7 @@ C = 1234567891
 fac = [1] * 1000001
 
 for i in range(1, 1000001):
-    fac[i] = (fac[i - 1] * i) % C
+    fac[i] = fac[i - 1] * i % C
 
 for case in range(1, T + 1):
     N, R = map(int, input().split())

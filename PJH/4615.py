@@ -44,7 +44,48 @@ for case in range(1, T + 1):
         rd = []
         ld = []
 
-        print("R")
+        sx, sy = x, y
+
+        while sy > 0:
+            sy -= 1
+            sx -= 1
+
+            if sy == 0 or sx == 0:
+                break
+
+        for i in range(N - sx):
+            if sy + i == N:
+                break
+            rd.append(board[sy + i][sx + i])
+
+        for i in range(sx + 1):
+            if sy + i == N or sx - i < 0:
+                break
+            ld.append(board[sy + i][sx - i])
+
+        if rd.count(c) >= 2:
+            first_index = rd.index(c)
+            last_index = len(rd) - list(reversed(rd)).index(c)
+
+            for i in range(first_index, last_index):
+                board[sy + i][sx + i] = c
+
+        if ld.count(c) >= 2:
+            first_index = ld.index(c)
+            last_index = len(ld) - list(reversed(ld)).index(c)
+
+            for i in range(first_index, last_index):
+                board[sy + i][sx - i] = c
+
+    white = 0
+    black = 0
+
+    for _ in board:
+        white += _.count(1)
+        black += _.count(2)
+
+    result.append(f"#{case} {white} {black}")
+
 for _ in result:
     print(_)
 
