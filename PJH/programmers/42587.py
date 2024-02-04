@@ -20,11 +20,6 @@ def solution(priorities, location):
             if process == target:
                 return len(proceed)
 
-
-
-
-
-
     return answer
 
 solution([2, 1, 3, 2],	2)
