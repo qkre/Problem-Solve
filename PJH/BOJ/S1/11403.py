@@ -30,8 +30,6 @@ def solution():
 
                             q.append((init, end, i))
 
-
-
     for g in graph:
         print(*g)
 
