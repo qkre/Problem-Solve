@@ -1,6 +1,5 @@
 from sys import stdin
 from collections import deque
-
 input = stdin.readline
 
 def bfs(q, max_node, max_cost, tree, visited):
@@ -18,31 +17,30 @@ def bfs(q, max_node, max_cost, tree, visited):
     return max_node, max_cost
 
 def solution():
-    V = int(input())
-    tree = [[] for _ in range(V + 1)]
-    for _ in range(V):
-        arr = list(map(int, input().split()))
-        S = arr[0]
-        arr = arr[1:-1]
-        for i in range(0, len(arr) - 1, 2):
-            tree[S].append((arr[i], arr[i + 1]))
+    N = int(input())
+
+    tree = [[] for _ in range(N + 1)]
+
+    for _ in range(1, N):
+        start, end, cost = map(int, input().split())
+        tree[start].append((end, cost))
+        tree[end].append((start, cost))
 
     max_node = 0
     max_cost = 0
-    visited = [False] * (V+1)
-    visited[1] = True
+
     q = deque([(1, 0)])
+    visited = [False] * (N + 1)
+    visited[1] = True
 
     max_node, max_cost = bfs(q, max_node, max_cost, tree, visited)
 
     q = deque([(max_node, 0)])
-    visited = [False] * (V + 1)
+    visited = [False] * (N+1)
     visited[max_node] = True
 
     max_node, max_cost = bfs(q, max_node, max_cost, tree, visited)
 
-
     print(max_cost)
-
 
 solution()
