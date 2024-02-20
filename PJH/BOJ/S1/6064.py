@@ -10,26 +10,45 @@ def solution(T, data):
     for M, N, x, y in data:
         target = [x, y]
 
-        now = [0, 0]
-        cnt = 0
-        X, Y = 0, 0
+        cnt = 1
+        X, Y = 1, 1
         while True:
-            cnt += 1
-            X += 1
-            Y += 1
+            state = False
+            if X == x or Y == y:
+                now = [X, Y]
+                while True:
+                    if now == target:
+                        print(cnt)
+                        break
+                    if now == [M, N]:
+                        print(-1)
+                        break
+                    now[0] += 1
+                    now[1] += 1
 
-            if X > M:
+                    if now[0] > M:
+                        now[0] = 1
+                    if now[1] > N:
+                        now[1] = 1
+                    cnt += 1
+
+
+                break
+
+
+            if M - X < N - Y:
+                state = True
+
+            if state:
+                Y += (M-X)+1
+                cnt += (M-X)+1
                 X = 1
-            if Y > N:
+
+            else:
+                cnt += (N-Y)+1
+                X += (N-Y)+1
                 Y = 1
 
-            now = [X, Y]
-            if now == target:
-                print(cnt)
-                break
-            if now == [M, N]:
-                print(-1)
-                break
 
 
 solution(T, data)
