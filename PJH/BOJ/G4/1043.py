@@ -11,7 +11,6 @@ for _ in range(M):
             knows = knows.union(party)
 
 cnt = 0
-
 for party in parties:
     if party & knows:
         continue
