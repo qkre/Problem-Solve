@@ -1,12 +1,12 @@
 from sys import stdin
 from collections import deque
-from heapq import heappop, heappush
+
 
 input = stdin.readline
 
 
 def solution():
-    answer = 0
+
     N, C = map(int, input().split())
     M = int(input())
 
