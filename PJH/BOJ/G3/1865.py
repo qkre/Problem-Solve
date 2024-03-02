@@ -1,29 +1,27 @@
 import sys
-from heapq import heappush, heappop
-
 input = sys.stdin.readline
-INF = sys.maxsize
+INF = float('inf')
 
 
-def dijkstra(distance, graph, start):
-    visited = [False] * len(distance)
-    visited[start] = True
+def bellmanford(start, edge, distance, N):
+    edges = len(edge)
+
     distance[start] = 0
 
-    heap = []
-    heappush(heap, [0, start])
+    for i in range(N+1):
+        update = False
+        for j in range(edges):
+            start_node, next_node, cost = edge[j]
 
-    while heap:
-        cost, node = heappop(heap)
+            if distance[start_node] + cost < distance[next_node]:
+                update = True
+                distance[next_node] = distance[start_node] + cost
+                if i == N:
+                    return True
+        if not update:
+            break
 
-        if distance[node] < cost:
-            continue
-
-        for next_cost, next_node in graph[node]:
-            if cost + next_cost < distance[next_node] and not visited[next_node]:
-                visited[next_node] = True
-                distance[next_node] = cost + next_cost
-                heappush(heap, (cost + next_cost, next_node))
+    return False
 
 
 def solution():
@@ -32,44 +30,31 @@ def solution():
     for _ in range(TC):
         N, M, W = map(int, input().split())
 
-        streets = [[] for _ in range(N + 1)]
-        wormholes = [[] for _ in range(N + 1)]
+        edge = []
 
         for _ in range(M):
             S, E, C = map(int, input().split())
-            if S == E:
-                continue
-            streets[S].append((C, E))
-            streets[E].append((C, S))
-
+            edge.append((S, E, C))
+            edge.append((E, S, C))
         for _ in range(W):
             S, E, C = map(int, input().split())
-            if S == E:
-                continue
-            wormholes[S].append((-C, E))
+            edge.append((S, E, -C))
 
-        streets_distance = [[float('INF') for _ in range(N + 1)] for _ in range(N + 1)]
-        wormholes_distance = [[float('INF') for _ in range(N + 1)] for _ in range(N + 1)]
+        edge = list(set(edge))
+
+        time_travel = False
+
         for i in range(1, N + 1):
-            dijkstra(streets_distance[i], streets, i)
-            dijkstra(wormholes_distance[i], wormholes, i)
+            distance = [INF] * (N + 1)
 
-        possible = False
-
-        for i in range(1, N+1):
-            for j in range(1, N+1):
-                if i == j:
-                    continue
-                if wormholes_distance[i][j] < 0 and streets_distance[i][j] != float('INF'):
-                    if streets_distance[i][j] + wormholes_distance[i][j] < 0:
-                        possible = True
-                        break
-            if possible:
+            if bellmanford(i, edge, distance, N):
+                time_travel = True
                 break
 
-        if possible:
+        if time_travel:
             print("YES")
         else:
             print("NO")
+
 
 solution()
