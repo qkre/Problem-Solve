@@ -3,212 +3,277 @@ from collections import deque
 from copy import deepcopy
 
 input = stdin.readline
+escaped = False
+possible = True
 
 
-def bfs(board, N, M, red, blue, hole):
-    visited = [[0 for _ in range(M)] for _ in range(N)]
-    visited[red[0]][red[1]] = 1
-    q = deque()
-    path = []
-    q.append([0, red, blue, board.copy()])
+def get_pos(maps, N, M):
+    BB = (0, 0)
+    BR = (0, 0)
+    HOLE = (0, 0)
+    for r in range(N):
+        for c in range(M):
+            if maps[r][c] == 'B':
+                BB = (r, c)
+            if maps[r][c] == 'R':
+                BR = (r, c)
+            if maps[r][c] == 'O':
+                HOLE = (r, c)
 
-    while q:
-        cost, rd, bd, board = q.popleft()
-        if bd == (0, 0):
-            continue
-        if rd == (0, 0):
-            return cost
-
-        moves = move_list(board, rd[0], rd[1], bd[0], bd[1], N, M)
-
-        for i in range(len(moves)):
-            nrd, nbd, next_board, d = moves[i][0][0], moves[i][0][1], moves[i][1], moves[i][2]
-            q.append([cost + 1, nrd, nbd, next_board])
-    return -1
-
-def is_loop(path, next_dir):
-    if path[-1] == 'U' and next_dir == 'D':
-        return True
-    if path[-1] == 'D' and next_dir == 'U':
-        return True
-    if path[-1] == 'L' and next_dir == 'R':
-        return True
-    if path[-1] == 'R' and next_dir == 'L':
-        return True
-    return False
+    return [BR, BB, HOLE]
 
 
-def move(board, sy, sx, N, M, D):
-    moved = False
-    # 상
-    if D == 'U':
-        for y in range(sy, 0, -1):
-            if board[y][sx] == 'R' or board[y][sx] == 'B':
-                if board[y - 1][sx] == 'O':
-                    board[y][sx] = '.'
-                    moved = True
-                elif board[y - 1][sx] == '.':
-                    board[y - 1][sx] = board[y][sx]
-                    board[y][sx] = '.'
-                    moved = True
+def move_up(maps, N, M):
+    global escaped, possible
+    possible = True
+    new_maps = deepcopy(maps)
 
-    # 하
-    if D == 'D':
-        for y in range(sy, N - 1):
-            if board[y][sx] == 'R' or board[y][sx] == 'B':
-                if board[y + 1][sx] == 'O':
-                    board[y][sx] = '.'
-                elif board[y + 1][sx] == '.':
-                    board[y + 1][sx] = board[y][sx]
-                    board[y][sx] = '.'
-    # 좌
-    if D == 'L':
-        for x in range(sx, 0, -1):
-            if board[sy][x] == 'R' or board[sy][x] == 'B':
-                if board[sy][x - 1] == 'O':
-                    board[sy][x] = '.'
-                elif board[sy][x - 1] == '.':
-                    board[sy][x - 1] = board[sy][x]
-                    board[sy][x] = '.'
+    BR, BB, HOLE = get_pos(maps, N, M)
 
-    if D == 'R':
-        for x in range(sx, M - 1):
-            if board[sy][x] == 'R' or board[sy][x] == 'B':
-                if board[sy][x + 1] == 'O':
-                    board[sy][x] = '.'
-                elif board[sy][x + 1] == '.':
-                    board[sy][x + 1] = board[sy][x]
-                    board[sy][x] = '.'
+    def move_red():
+        global escaped
+        # 빨간공 움직이기
+        BR_r, BR_c = BR
 
-    return board
+        for r in range(BR_r, 0, -1):
+            if new_maps[r - 1][BR_c] == '.':
+                new_maps[r - 1][BR_c] = 'R'
+                new_maps[r][BR_c] = '.'
+            elif new_maps[r - 1][BR_c] == 'O':
+                new_maps[r][BR_c] = '.'
+                escaped = True
+                break
+            else:
+                break
 
+    def move_blue():
+        global escaped, possible
+        # 파란공 움직이기
+        BB_r, BB_c = BB
 
-def find_ball(board, N, M):
-    red = (0, 0)
-    blue = (0, 0)
-    for y in range(N):
-        for x in range(M):
-            if board[y][x] == 'R':
-                red = (y, x)
-            if board[y][x] == 'B':
-                blue = (y, x)
+        for r in range(BB_r, 0, -1):
+            if new_maps[r - 1][BB_c] == '.':
+                new_maps[r - 1][BB_c] = 'B'
+                new_maps[r][BB_c] = '.'
+            elif new_maps[r - 1][BB_c] == 'O':
+                new_maps[r][BB_c] = '.'
+                escaped = False
+                possible = False
+                break
+            else:
+                break
 
-    return [red, blue]
-
-
-def is_moved(board, next_board):
-    return True
-
-    # for i, j in zip(board, next_board):
-    #     if i != j:
-    #         return True
-    # return True
-
-
-def move_list(board, ry, rx, by, bx, N, M):
-    dx, dy = [0, 0, -1, 1], [-1, 1, 0, 0]
-    moves = []
-    # 상하 서로 붙어 있는 경우
-    if rx == bx:
-        # 상
-        if by < ry:
-            # 빨간공 먼저 움직이기
-            next_board = move(deepcopy(board), ry, rx, N, M, 'U')
-            next_board = move(next_board, by, bx, N, M, 'U')
-            if is_moved(board, next_board):
-                moves.append([find_ball(next_board, N, M), next_board, 'U'])
-        elif ry < by:
-            next_board = move(deepcopy(board), by, bx, N, M, 'U')
-            next_board = move(next_board, ry, rx, N, M, 'U')
-            if is_moved(board, next_board):
-                moves.append([find_ball(next_board, N, M), next_board, 'U'])
-
-    if rx == bx:
-        # 하
-        if ry < by:
-            next_board = move(deepcopy(board), ry, rx, N, M, 'D')
-            next_board = move(next_board, by, bx, N, M, 'D')
-            if is_moved(board, next_board):
-                moves.append([find_ball(next_board, N, M), next_board, 'D'])
-
-        elif by < ry:
-            next_board = move(deepcopy(board), by, bx, N, M, 'D')
-            next_board = move(next_board, ry, rx, N, M, 'D')
-            if is_moved(board, next_board):
-                moves.append([find_ball(next_board, N, M), next_board, 'D'])
-
-        # 좌우
-        for i in range(2, 4):
-            D = "UDLR"[i]
-            next_board = move(deepcopy(board), ry, rx, N, M, D)
-            next_board = move(next_board, by, bx, N, M, D)
-            if is_moved(board, next_board):
-                moves.append([find_ball(next_board, N, M), next_board, D])
-
-    # 좌우 서로 붙어 있는 경우
-    if ry == by:
-        # 좌
-        if rx < bx:
-            # 빨간공 먼저 움직이기
-            next_board = move(deepcopy(board), ry, rx, N, M, 'L')
-            next_board = move(next_board, by, bx, N, M, 'L')
-            if is_moved(board, next_board):
-                moves.append([find_ball(next_board, N, M), next_board, 'L'])
-        elif bx < rx:
-            next_board = move(deepcopy(board), by, bx, N, M, 'L')
-            next_board = move(next_board, ry, rx, N, M, 'L')
-            if is_moved(board, next_board):
-                moves.append([find_ball(next_board, N, M), next_board, 'L'])
-
-    if ry == by:
-        # 우
-        if bx < rx:
-            next_board = move(deepcopy(board), ry, rx, N, M, 'R')
-            next_board = move(next_board, by, bx, N, M, 'R')
-            if is_moved(board, next_board):
-                moves.append([find_ball(next_board, N, M), next_board, 'R'])
-
-        elif rx < bx:
-            next_board = move(deepcopy(board), by, bx, N, M, 'R')
-            next_board = move(next_board, ry, rx, N, M, 'R')
-            if is_moved(board, next_board):
-                moves.append([find_ball(next_board, N, M), next_board, 'R'])
-
-        # 상하
-        for i in range(2):
-            D = "UDLR"[i]
-            next_board = move(deepcopy(board), ry, rx, N, M, D)
-            next_board = move(next_board, by, bx, N, M, D)
-            if is_moved(board, next_board):
-                moves.append([find_ball(next_board, N, M), next_board, D])
-
+    if BR[1] == BB[1]:
+        if BR[0] > BB[0]:
+            move_blue()
+            if possible:
+                move_red()
+        else:
+            move_red()
+            move_blue()
     else:
-        for i in range(4):
-            D = "UDLR"[i]
-            next_board = move(deepcopy(board), ry, rx, N, M, D)
-            next_board = move(next_board, by, bx, N, M, D)
-            if is_moved(board, next_board):
-                moves.append([find_ball(next_board, N, M), next_board, D])
+        move_red()
+        move_blue()
 
-    return moves
+    return new_maps
+
+
+def move_down(maps, N, M):
+    global escaped, possible
+
+    possible = True
+    new_maps = deepcopy(maps)
+
+    BR, BB, HOLE = get_pos(maps, N, M)
+
+    def move_red():
+        global escaped
+        BR_r, BR_c = BR
+
+        for r in range(BR_r, N - 1):
+            if new_maps[r + 1][BR_c] == '.':
+                new_maps[r + 1][BR_c] = 'R'
+                new_maps[r][BR_c] = '.'
+            elif new_maps[r + 1][BR_c] == 'O':
+                new_maps[r][BR_c] = '.'
+                escaped = True
+                break
+            else:
+                break
+
+    def move_blue():
+        global escaped, possible
+        BB_r, BB_c = BB
+
+        for r in range(BB_r, N - 1):
+            if new_maps[r + 1][BB_c] == '.':
+                new_maps[r + 1][BB_c] = 'B'
+                new_maps[r][BB_c] = '.'
+            elif new_maps[r + 1][BB_c] == 'O':
+                new_maps[r][BB_c] = '.'
+                escaped = False
+                possible = False
+                break
+            else:
+                break
+
+    if BR[1] == BB[1]:
+        if BR[0] < BB[0]:
+            move_blue()
+            if possible:
+                move_red()
+        else:
+            move_red()
+            move_blue()
+    else:
+        move_red()
+        move_blue()
+
+    return new_maps
+
+
+def move_left(maps, N, M):
+    global escaped, possible
+    possible = True
+    new_maps = deepcopy(maps)
+
+    BR, BB, HOLE = get_pos(maps, N, M)
+
+    def move_red():
+        global escaped
+        BR_r, BR_c = BR
+
+        for c in range(BR_c, 0, -1):
+            if new_maps[BR_r][c - 1] == '.':
+                new_maps[BR_r][c - 1] = 'R'
+                new_maps[BR_r][c] = '.'
+            elif new_maps[BR_r][c - 1] == 'O':
+                new_maps[BR_r][c] = '.'
+                escaped = True
+                break
+            else:
+                break
+
+    def move_blue():
+        global escaped, possible
+        BB_r, BB_c = BB
+
+        for c in range(BB_c, 0, -1):
+            if new_maps[BB_r][c - 1] == '.':
+                new_maps[BB_r][c - 1] = 'B'
+                new_maps[BB_r][c] = '.'
+            elif new_maps[BB_r][c - 1] == 'O':
+                new_maps[BB_r][c] = '.'
+                escaped = False
+                possible = False
+                break
+            else:
+                break
+
+    if BR[0] == BB[0]:
+        if BR[1] > BB[1]:
+            move_blue()
+            if possible:
+                move_red()
+        else:
+            move_red()
+            move_blue()
+    else:
+        move_red()
+        move_blue()
+
+    return new_maps
+
+
+def move_right(maps, N, M):
+    global escaped, possible
+    possible = True
+    new_maps = deepcopy(maps)
+
+    BR, BB, HOLE = get_pos(maps, N, M)
+
+    def move_red():
+        global escaped
+        BR_r, BR_c = BR
+
+        for c in range(BR_c, M):
+            if new_maps[BR_r][c + 1] == '.':
+                new_maps[BR_r][c + 1] = 'R'
+                new_maps[BR_r][c] = '.'
+            elif new_maps[BR_r][c + 1] == 'O':
+                new_maps[BR_r][c] = '.'
+                escaped = True
+                break
+            else:
+                break
+
+    def move_blue():
+        global escaped, possible
+        BB_r, BB_c = BB
+
+        for c in range(BB_c, M):
+            if new_maps[BB_r][c + 1] == '.':
+                new_maps[BB_r][c + 1] = 'B'
+                new_maps[BB_r][c] = '.'
+            elif new_maps[BB_r][c + 1] == 'O':
+                new_maps[BB_r][c] = '.'
+                escaped = False
+                possible = False
+                break
+            else:
+                break
+
+    if BR[0] == BB[0]:
+        if BR[1] < BB[1]:
+            move_blue()
+            if possible:
+                move_red()
+        else:
+            move_red()
+            move_blue()
+    else:
+        move_red()
+        move_blue()
+
+    return new_maps
 
 
 def solution():
+    global possible
     N, M = map(int, input().split())
-    board = [list(input().rstrip()) for _ in range(N)]
 
-    red, blue, hole = [], [], []
-    for y in range(N):
-        for x in range(M):
-            if board[y][x] == 'R':
-                red = (y, x)
-            if board[y][x] == 'B':
-                blue = (y, x)
-            if board[y][x] == 'O':
-                hole = (y, x)
+    maps = list(list(input().rstrip()) for _ in range(N))
 
-    answer = bfs(board, N, M, red, blue, hole)
-    print(answer)
+    q = deque([])
+
+    q.append((maps, 0))
+
+    while q:
+        now, cnt = q.popleft()
+
+        if cnt == 10:
+            continue
+
+        U = move_up(now, N, M)
+        if now != U and possible:
+            q.append((U, cnt + 1))
+
+        D = move_down(now, N, M)
+        if now != D and possible:
+            q.append((D, cnt + 1))
+        L = move_left(now, N, M)
+        if now != L and possible:
+            q.append((L, cnt + 1))
+        R = move_right(now, N, M)
+        if now != R and possible:
+            q.append((R, cnt + 1))
+
+        if escaped:
+            print(cnt + 1)
+            break
+
+    if not escaped:
+        print(-1)
 
 
 solution()
