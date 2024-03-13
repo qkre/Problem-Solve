@@ -258,12 +258,26 @@ def solution():
         if now != U and possible:
             q.append((U, cnt + 1))
 
+        if escaped:
+            print(cnt + 1)
+            break
+
         D = move_down(now, N, M)
         if now != D and possible:
             q.append((D, cnt + 1))
+
+        if escaped:
+            print(cnt + 1)
+            break
+
         L = move_left(now, N, M)
         if now != L and possible:
             q.append((L, cnt + 1))
+
+        if escaped:
+            print(cnt + 1)
+            break
+
         R = move_right(now, N, M)
         if now != R and possible:
             q.append((R, cnt + 1))
@@ -271,6 +285,7 @@ def solution():
         if escaped:
             print(cnt + 1)
             break
+
 
     if not escaped:
         print(-1)
