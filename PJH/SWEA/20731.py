@@ -1,41 +1,40 @@
 import os
 import sys
-from math import gcd
 
 current_file = os.path.basename(__file__)[:-3]
 sys.stdin = open(f"../../input/{current_file}_input.txt", "r", encoding="utf-8-sig")
 
-import math
+from math import gcd
 
 result = []
 T = int(input())
-for case in range(1, T+1):
+for case in range(1, T + 1):
 
     N = int(input())
     board = list(list(input()) for _ in range(N))
-    ans = "YES"
-    for r in range(1, N+1):
-        for c in range(1, N+1):
-            K = max(r, c)
+    ans = False
 
-            check = False
-            for k in range(K+1):
-                d = gcd(r+k, c+k)
-                if d != 1:
-                    check = True
-                    break
-            if check and board[r-1][c-1] == '1':
-                continue
-            elif not check and board[r-1][c-1] == '?':
-                continue
-            else:
-                ans = "NO"
+    for K in range(N+1):
+        ans = True
+        for i in range(N):
+            for j in range(N):
+                if gcd(i + 1 + K, j + 1 + K) == 1:
+                    if board[i][j] != '1':
+                        ans = False
+                        break
+                else:
+                    if board[i][j] != '?':
+                        ans = False
+                        break
+            if not ans:
+                break
+        if ans:
+            break
 
-    result.append(f"#{case} {ans}")
+    result.append(f"#{case} {'YES' if ans else 'NO'}")
 
 for _ in result:
     print(_)
-
 
 output = open(f"../../input/{current_file}_output.txt", "r").readlines()
 output = [line.strip() for line in output]
