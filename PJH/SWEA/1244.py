@@ -1,47 +1,41 @@
 import os
 import sys
+from check_answer import check_answer
 
 current_file = os.path.basename(__file__)[:-3]
-sys.stdin = open(f"../../input/{current_file}_input.txt", "r", encoding="utf-8-sig")
-
-
-def dfs(depth):
-    global ans
-
-    if depth == M:
-        ans = max(ans, int(''.join(arr)))
-        return
-
-    for i in range(len(arr)):
-        for j in range(i + 1, len(arr)):
-            arr[i], arr[j] = arr[j], arr[i]
-
-            check = int(''.join(arr))
-            if (depth, check) not in visited:
-                visited.append((depth, check))
-                dfs(depth + 1)
-
-            arr[i], arr[j] = arr[j], arr[i]
-
+sys.stdin = open(f"../input/{current_file}.txt", "r", encoding="utf-8-sig")
 
 result = []
 T = int(input())
+
+def dfs(depth, current):
+    global ans, N, length
+    if depth == N:
+        ans = max(ans, int(''.join(current)))
+        return
+
+    for i in range(length):
+        for j in range(i+1, length):
+            current[i], current[j] = current[j], current[i]
+            if (''.join(current), depth) not in visited:
+                visited.append((''.join(current), depth))
+                dfs(depth+1, current)
+            current[i], current[j] = current[j], current[i]
+
 for case in range(1, T + 1):
-    N, M = map(int, input().split())
-    arr = list(str(N))
-    visited = []
     ans = 0
-    dfs(0)
+
+    numbers, N = map(int, input().split())
+    numbers = list(str(numbers))
+    length = len(numbers)
+    visited = []
+
+    dfs(0, numbers)
+
 
     result.append(f"#{case} {ans}")
-for _ in result:
-    print(_)
 
-output = open(f"../../input/{current_file}_output.txt", "r").readlines()
-output = [line.strip() for line in output]
+for r in result:
+    print(r)
 
-print("------------------- 오답 ------------------ ( 이 아래로 출력이 없으면 정답)")
-
-for r, o in zip(result, output):
-    if r != o:
-        print(f"정답 : {o},     오답 : {r}")
+check_answer(current_file, result)

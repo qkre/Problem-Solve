@@ -1,17 +1,27 @@
+import os
 import sys
+from check_answer import check_answer
 
-sys.stdin = open("input/1204_input.txt", "r")
+current_file = os.path.basename(__file__)[:-3]
+sys.stdin = open(f"../input/{current_file}.txt", "r", encoding="utf-8-sig")
 
+result = []
 T = int(input())
+
+from collections import Counter
 
 for case in range(1, T + 1):
     N = int(input())
-    scores = list(map(int, input().split()))
+    ans = 0
+    arr = list(map(int, input().split()))
 
-    max_score = 0
+    ans = Counter(arr).most_common()[0][0]
 
-    for i in range(101):
-        if scores.count(max_score) <= scores.count(i):
-            max_score = i
 
-    print(f"#{case} {max_score}")
+
+    result.append(f"#{case} {ans}")
+
+for r in result:
+    print(r)
+
+check_answer(current_file, result)

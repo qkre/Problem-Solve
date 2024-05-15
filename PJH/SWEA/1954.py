@@ -1,57 +1,51 @@
+import os
 import sys
+from check_answer import check_answer
 
-sys.stdin = open("input/1954_input.txt", "r")
+current_file = os.path.basename(__file__)[:-3]
+sys.stdin = open(f"../input/{current_file}.txt", "r", encoding="utf-8-sig")
 
+result = []
 T = int(input())
-
-
-def move(x, y, depth, direction):
-    global N, snail_map
-
-    if depth == N**2 + 1:
-        return
-
-    snail_map[y][x] = depth
-
-    # right
-    if direction == 0:
-        if x < N - 1 and snail_map[y][x + 1] == 0:
-            move(x + 1, y, depth + 1, 0)
-        else:
-            move(x, y + 1, depth + 1, 1)
-
-    # down
-    if direction == 1:
-        if y < N - 1 and snail_map[y + 1][x] == 0:
-            move(x, y + 1, depth + 1, 1)
-        else:
-            move(x - 1, y, depth + 1, 2)
-
-    # left
-    if direction == 2:
-        if x > 0 and snail_map[y][x - 1] == 0:
-            move(x - 1, y, depth + 1, 2)
-        else:
-            move(x, y - 1, depth + 1, 3)
-
-    # up
-    if direction == 3:
-        if y > 0 and snail_map[y - 1][x] == 0:
-            move(x, y - 1, depth + 1, 3)
-        else:
-            move(x + 1, y, depth + 1, 0)
-
-
 for case in range(1, T + 1):
-    global N
+    ans = 0
     N = int(input())
+    maps = [[0 for _ in range(N)] for _ in range(N)]
+    r, c, d = 0, 0, "R"
+    while ans < N ** 2:
+        ans += 1
+        maps[r][c] = ans
 
-    snail_map = list([0 for _ in range(N)] for _ in range(N))
+        if d == "R":
+            if c + 1 < N and maps[r][c + 1] == 0:
+                c += 1
+            else:
+                r += 1
+                d = "D"
+        elif d == "D":
+            if r + 1 < N and maps[r + 1][c] == 0:
+                r += 1
+            else:
+                c -= 1
+                d = "L"
+        elif d == "L":
+            if c - 1 >= 0 and maps[r][c - 1] == 0:
+                c -= 1
+            else:
+                r -= 1
+                d = "U"
+        elif d == "U":
+            if r - 1 >= 0 and maps[r - 1][c] == 0:
+                r -= 1
+            else:
+                c += 1
+                d = "R"
 
-    snail_map[0][0] = 1
+    result.append(f"#{case}")
+    for row in maps:
+        result.append(' '.join(map(str, row)))
 
-    move(0, 0, 1, 0)
+for r in result:
+    print(r)
 
-    print(f"#{case}")
-    for row in snail_map:
-        print(*row)
+check_answer(current_file, result)

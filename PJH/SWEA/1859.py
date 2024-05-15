@@ -1,24 +1,47 @@
+import os
 import sys
+from check_answer import check_answer
 
-sys.stdin = open("SWEA/input/1859_input.txt", "r")
+current_file = os.path.basename(__file__)[:-3]
+sys.stdin = open(f"../input/{current_file}.txt", "r", encoding="utf-8-sig")
 
-
-global prices
-
+result = []
 T = int(input())
 
-for i in range(T):
+from collections import deque
+
+for case in range(1, T + 1):
     N = int(input())
+
+    ans = 0
+
     prices = list(map(int, input().split()))
-    benefit = 0
+    prices = deque(prices)
 
-    while len(prices) > 1:
-        max_price_idx = prices.index(max(prices))
+    have = 0
+    max_price = max(prices)
+    while prices:
+        now = prices.popleft()
 
-        head = prices[: max_price_idx + 1]
-        prices = prices[max_price_idx + 1 :]
+        if max_price < now:
+            continue
 
-        for j in head:
-            benefit += head[-1] - j
+        if now == max_price:
+            ans += have * now
+            have = 0
+            if prices:
+                max_price = max(prices)
+            continue
 
-    print(f"#{i+1} {benefit}")
+        have += 1
+        ans -= now
+
+
+
+
+    result.append(f"#{case} {ans}")
+
+for r in result:
+    print(r)
+
+check_answer(current_file, result)

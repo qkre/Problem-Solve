@@ -1,38 +1,43 @@
+import os
 import sys
+from check_answer import check_answer
 
-sys.stdin = open("input/1249_input.txt", "r")
+current_file = os.path.basename(__file__)[:-3]
+sys.stdin = open(f"../input/{current_file}.txt", "r", encoding="utf-8-sig")
 
+from heapq import heappop, heappush
+result = []
 T = int(input())
 
-INF = 10**5
+def dijkstra():
+    heap = [(0, 0, 0)]
+    min_maps = [[float("inf") for _ in range(N)] for _ in range(N)]
+    min_maps[0][0] = 0
+    while heap:
+        cost, r, c = heappop(heap)
 
+        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            nr, nc = r + dr, c + dc
 
-def bfs(si, sj, ei, ej):
-    q = []
-    v = [[INF] * N for _ in range(N)]
+            if 0 <= nr < N and 0 <= nc < N:
+                ncost = cost + maps[nr][nc]
+                if ncost < min_maps[nr][nc]:
+                    min_maps[nr][nc] = ncost
+                    heappush(heap, (ncost, nr, nc))
 
-    q.append((si, sj))
-    v[si][sj] = arr[si][sj]
-
-    while q:
-        ci, cj = q.pop(0)
-
-        # 네 방향, 범위 내 중복 허용 (이동할 위치보다 더 적은 비용만)
-        for di, dj in ((-1, 0), (1, 0), (0, -1), (0, 1)):
-            ni, nj = ci + di, cj + dj
-
-            if 0 <= ni < N and 0 <= nj < N and v[ni][nj] > v[ci][cj] + arr[ni][nj]:
-                q.append((ni, nj))
-                v[ni][nj] = v[ci][cj] + arr[ni][nj]
-
-    return v[ei][ej]
-
-
+    return min_maps[-1][-1]
 for case in range(1, T + 1):
+    ans = 0
     N = int(input())
 
-    arr = [list(map(int, input())) for _ in range(N)]
+    maps = [list(map(int, list(input()))) for _ in range(N)]
 
-    ans = bfs(0, 0, N - 1, N - 1)
+    ans = dijkstra()
 
-    print(f"#{case} {ans}")
+
+    result.append(f"#{case} {ans}")
+
+for r in result:
+    print(r)
+
+check_answer(current_file, result)

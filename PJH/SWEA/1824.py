@@ -1,105 +1,74 @@
 import os
 import sys
+from check_answer import check_answer
 
 current_file = os.path.basename(__file__)[:-3]
-sys.stdin = open(f"../../input/{current_file}_input.txt", "r", encoding="utf-8-sig")
+sys.stdin = open(f"../input/{current_file}.txt", "r", encoding="utf-8-sig")
 
-from collections import deque
-sys.setrecursionlimit(10**5)
-result = []
+from collections import deque, defaultdict
+
 T = int(input())
-
-
-def decode(cmd, m, d):
-    if cmd == "<":
-        return m, "L"
-
-    if cmd == ">":
-        return m, "R"
-
-    if cmd == "^":
-        return m, "U"
-
-    if cmd == "v":
-        return m, "D"
-
-    if cmd == "_":
-        if m == 0:
-            return m, "R"
-        else:
-            return m, "L"
-    if cmd == "|":
-        if m == 0:
-            return m, "D"
-        else:
-            return m, "U"
-    if cmd.isdigit():
-        return int(cmd), d
-    if cmd == "+":
-        return (m + 1) % 16, d
-    if cmd == "-":
-        return (m - 1) % 16, d
-
-    return m, d
-
+result = []
 
 def move(r, c, d):
+    global R, C
     if d == "L":
-        return r, c - 1 if c - 1 >= 0 else C - 1
+        return r, (c - 1) % C
     if d == "R":
-        return r, c + 1 if c + 1 < C else 0
+        return r, (c + 1) % C
     if d == "U":
-        return r - 1 if r - 1 >= 0 else R - 1, c
+        return (r - 1) % R, c
     if d == "D":
-        return r + 1 if r + 1 < R else 0, c
-
-def dfs(r, c, m, d, path):
-    global ans, pos
-
-    if (r, c) == pos:
-        ans = "YES"
-        return
-
-    if board[r][c] != "?":
-        m, d = decode(board[r][c], m, d)
-        r, c = move(r, c, d)
-
-        if (r, c, m, d) not in path:
-            path.append((r, c, m, d))
-            dfs(r, c, m, d, path)
-            path.pop()
-    else:
-        for nd in "LRUD":
-            nr, nc = move(r, c, nd)
-
-            if (nr, nc, m, nd) not in path:
-                path.append((nr, nc, m, nd))
-                dfs(nr, nc, m, nd, path)
-
+        return (r + 1) % R, c
 
 for case in range(1, T + 1):
     ans = "NO"
     R, C = map(int, input().split())
-    board = list(list(input()) for _ in range(R))
+    maps = list(list(input()) for _ in range(R))
+    visited = defaultdict(bool)
 
-    pos = (-1, -1)
-    for i in range(R):
-        for j in range(C):
-            if board[i][j] == '@':
-                pos = (i, j)
+    q = deque([(0, 0, 0, "R")])
 
-    if pos != (-1, -1):
-        dfs(0, 0, 0, "R", [])
+    while q:
+        r, c, m, d = q.popleft()
+
+        if maps[r][c] == "<":
+            d = "L"
+        elif maps[r][c] == ">":
+            d = "R"
+        elif maps[r][c] == "^":
+            d = "U"
+        elif maps[r][c] == 'v':
+            d = "D"
+        elif maps[r][c] == '_':
+            d = "R" if m == 0 else "L"
+        elif maps[r][c] == '|':
+            d = "D" if m == 0 else "U"
+        elif maps[r][c].isdigit():
+            m = int(maps[r][c])
+        elif maps[r][c] == "+":
+            m = (m + 1) % 16
+        elif maps[r][c] == '-':
+            m = (m - 1) % 16
+        elif maps[r][c] == "?":
+            for nd in "LRUD":
+                nr, nc = move(r, c, nd)
+                if not visited[(nr, nc, m, nd)]:
+                    visited[(nr, nc, m, nd)] = True
+                    q.append((nr, nc, m, nd))
+        elif maps[r][c] == "@":
+            ans = "YES"
+            break
+
+        r, c = move(r, c, d)
+        if not visited[(r, c, m, d)]:
+            visited[(r, c, m, d)] = True
+            q.append((r, c, m, d))
+
 
     result.append(f"#{case} {ans}")
-for _ in result:
-    print(_)
 
-output = open(f"../../input/{current_file}_output.txt", "r").readlines()
-output = [line.strip() for line in output]
+for r in result:
+    print(r)
 
-print("------------------- 오답 ------------------ ( 이 아래로 출력이 없으면 정답)")
-
-for y, o in zip(result, output):
-    if y != o:
-        print(f"정답 : {o},     오답 : {y}")
+check_answer(current_file, result)
