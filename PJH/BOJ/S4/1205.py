@@ -1,24 +1,17 @@
-N, T, P = map(int, input().split())
-scores = list(map(int, input().split()))
-scores.sort()
-rank = 1
-ranks = [[] for _ in range(P + 1)]
+from bisect import bisect_left, bisect_right
 
-while scores:
-    now = scores.pop()
-    ranks[rank].append(now)
-    while True and scores:
-        if scores[-1] == now:
-            ranks[rank].append(scores.pop())
-        else:
-            break
-    rank += len(ranks[rank])
+N, S, P = map(int, input().split())
+try:
+    ranks = list(map(int, input().split()))
 
-answer = -1
+    ranks.reverse()
+    rank = -1
+    if len(ranks) == P:
+        if bisect_left(ranks, S) != 0:
+            rank = P - bisect_right(ranks, S) + 1
+    else:
+        rank = len(ranks) - bisect_right(ranks, S) + 1
 
-for i in range(1, P+1):
-    if T in ranks[i]:
-        answer = i
-        break
-
-print(answer)
+    print(rank)
+except:
+    print(1)
